@@ -1,0 +1,87 @@
+nsd:nsd-catalog:
+    nsd:nsd:
+    -   nsd:constituent-vnfd:
+        -   nsd:member-vnf-index: '1'
+            nsd:start-by-default: 'false'
+            nsd:vnfd-id-ref: id_pts_vnf
+        -   nsd:member-vnf-index: '2'
+            nsd:start-by-default: 'true'
+            nsd:vnfd-id-ref: id_tse_vnf
+        -   nsd:member-vnf-index: '3'
+            nsd:start-by-default: 'true'
+            nsd:vnfd-id-ref: server-vnfd
+        -   nsd:member-vnf-index: '4'
+            nsd:start-by-default: 'true'
+            nsd:vnfd-id-ref: server-vnfd
+        scaling-group-descriptor:
+        -   scaling-policy:
+            -   scaling-type: "automatic"
+                scale-out-operation-type: "OR"
+                cooldown-time: 10
+                scale-in-operation-type: "AND"
+                enabled: "true"
+                threshold-time: 10
+                name: "used-flows"
+                scaling-criteria:
+                -
+                    ns-monitoring-param-ref: "used-flows"
+                    name: "used-flows"
+                    scale-out-threshold: 2
+            vnfd-member:
+            -   member-vnf-index-ref: 1
+                count: 1
+            min-instance-count: 1
+            max-instance-count: 10
+            name: "pts scaling"
+            scaling-config-action:
+            -   trigger: "post-scale-out"
+                ns-config-primitive-name-ref: "pts_post_scale_out"
+        monitoring-param:
+        -   widget-type: "GAUGE"
+            aggregation-type: "AVERAGE"
+            units: "flows"
+            name: "used-flows"
+            value-type: "INT"
+            id: "used-flows"
+            vnfd-monitoring-param:
+            -   vnfd-id-ref: "id_pts_vnf"
+                vnfd-monitoring-param-ref: "used-flows"
+        service-primitive:
+        -   name: "pts_post_scale_out"
+            user-defined-script: "pts_scale.py"
+        nsd:id: 27b66d07-203a-4a84-88f2-e44192caa405
+        nsd:initial-config-primitive:
+        -   nsd:name: set license server
+            nsd:parameter:
+            -   nsd:name: license_server
+            nsd:seq: '1'
+            nsd:user-defined-script: set_license_server.py
+        nsd:name: tse-pts-scaling
+        nsd:vld:
+        -   nsd:id: cc4cf
+            nsd:name: sub
+            nsd:vnfd-connection-point-ref:
+            -   nsd:member-vnf-index-ref: '2'
+                nsd:vnfd-connection-point-ref: subscriber-cp
+                nsd:vnfd-id-ref: id_tse_vnf
+            -   nsd:member-vnf-index-ref: '4'
+                nsd:vnfd-connection-point-ref: cp1
+                nsd:vnfd-id-ref: server-vnfd
+        -   nsd:id: 7b8b0
+            nsd:name: int
+            nsd:vnfd-connection-point-ref:
+            -   nsd:member-vnf-index-ref: '2'
+                nsd:vnfd-connection-point-ref: internet-cp
+                nsd:vnfd-id-ref: id_tse_vnf
+            -   nsd:member-vnf-index-ref: '3'
+                nsd:vnfd-connection-point-ref: cp1
+                nsd:vnfd-id-ref: server-vnfd
+        -   nsd:id: 6c88f
+            nsd:name: service
+            nsd:vnfd-connection-point-ref:
+            -   nsd:member-vnf-index-ref: '2'
+                nsd:vnfd-connection-point-ref: service-cp
+                nsd:vnfd-id-ref: id_tse_vnf
+            -   nsd:member-vnf-index-ref: '1'
+                nsd:vnfd-connection-point-ref: service-cp
+                nsd:vnfd-id-ref: id_pts_vnf
